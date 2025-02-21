@@ -1,24 +1,42 @@
 import rhino3dm
 import os
+import csv
 
-# Lecture du fichier .3dm
+# Chemin d'accès au fichier
 file_path = "./input/R21_3d.3dm"
+output_path = "./output/first_layer.gltf"
 
-# Vérifier si le fichier est accessible
+# Vérification de l'existence  du fichier
 if not os.path.exists(file_path):
-    print(f"Erreur : le fichier '{file_path}' n'existe pas.")
+    print(f"Error: The file '{file_path}' does not exist.")
 else:
+    # Lecture du fichier .3dm
     model = rhino3dm.File3dm.Read(file_path)
     if model is None:
-        print("Erreur : Impossible de charger le fichier .3dm.")
+        print("Erreur lors du chargement du fichier.")
     else:
-        print("Fichier chargé avec succès.")
-        # Vérifier le système d'unités du modèle
-        unit_system = model.Settings.ModelUnitSystem
-        print(f"Système d'unités du modèle : {unit_system}")
-        # Obtenir la BoundingBox du modèle
-        bbox = model.Objects.GetBoundingBox()
-        if bbox:
-            print(f"BoundingBox: Min=({bbox.Min.X}, {bbox.Min.Y}, {bbox.Min.Z}), Max=({bbox.Max.X}, {bbox.Max.Y}, {bbox.Max.Z})")
-        else:
-            print("Erreur : Impossible d'obtenir la BoundingBox.")
+        print("Fichier correctement chargé.")
+
+        # Affichage des informations générales du fichier
+        print(f"Systèmes d'unité de mesures: {model.Settings.ModelUnitSystem}")
+        print(f"Point de référence du modèle: {model.Settings.ModelBasePoint}")
+        
+        # Affichage des informations relatives aux couches
+        layers = model.Layers
+        print(f"Nombre de couches: {len(layers)}")
+        
+        # Définition du fichier en sortie
+        csv_output_path = "./output/layers_info.csv"
+
+        # Ecriture du fichier CSV avec les entêtes
+        with open(csv_output_path, mode='w', newline='') as csv_file:
+            fieldnames = ['Groupe de couches', 'Index de la couche', 'Nom de la couche', "Nombre d'objets"]
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer.writeheader()
+
+            # Itération sur les couches
+            for i, layer in enumerate(layers):
+                layer_objects = [obj for obj in model.Objects if obj.Attributes.LayerIndex == layer.Index]
+                writer.writerow({'Groupe de couches': layer.ParentLayerId, 'Index de la couche': layer.Index, 'Nom de la couche': layer.Name, "Nombre d'objets" : len(layer_objects)})
+
+        print(f"Informations des couches écrites dans le fichier CSV : {csv_output_path}")
