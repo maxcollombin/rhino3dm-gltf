@@ -25,8 +25,26 @@ def export_to_obj(file_3dm, file_obj):
                         obj_file.write(f"f {face[0]+vertex_offset} {face[1]+vertex_offset} {face[2]+vertex_offset}\n")
 
                 vertex_offset += len(geom.Vertices)
+            elif isinstance(geom, rhino3dm.Brep):
+                # Convert Brep to Mesh
+                brep_mesh = geom.Faces[0].GetMesh(rhino3dm.MeshType.Render)
+                if brep_mesh:
+                    # Écriture des sommets
+                    for v in brep_mesh.Vertices:
+                        obj_file.write(f"v {v.X} {v.Y} {v.Z}\n")
+
+                    # Écriture des faces
+                    for i in range(brep_mesh.Faces.Count):
+                        face = brep_mesh.Faces[i]  # Accéder à la face directement
+
+                        if len(face) == 4:  # Quad
+                            obj_file.write(f"f {face[0]+vertex_offset} {face[1]+vertex_offset} {face[2]+vertex_offset} {face[3]+vertex_offset}\n")
+                        else:  # Triangle
+                            obj_file.write(f"f {face[0]+vertex_offset} {face[1]+vertex_offset} {face[2]+vertex_offset}\n")
+
+                    vertex_offset += len(brep_mesh.Vertices)
 
     print(f"Export terminé : {file_obj}")
 
 # 🔹 Utilisation :
-export_to_obj("input/R21_3d.3dm", "output/test.obj")
+export_to_obj("input/R21_3d.3dm", "output/test1.obj")
