@@ -5,7 +5,8 @@ input_file = "R21_3d.3dm"   # Remplace par ton fichier source
 output_file = "R21_3d_trsl.3dm"
 
 # Définir l'origine en EPSG:2056 (ex: Berne ou autre point de référence)
-translation_vector = (2592980.6849999987, 1119281.7030000016, 483.8)
+# translation_vector = (2592980.6849999987, 1119281.7030000016, 483.8)
+translation_vector = (2592980.6849999987, 1119281.7030000016, 0)
 
 # Créer un objet Vector3d pour la translation
 translation = rhino3dm.Vector3d(*translation_vector)
